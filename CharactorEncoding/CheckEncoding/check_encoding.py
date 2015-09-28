@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+Ôªø#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import os
@@ -11,7 +11,11 @@ import glob
 import re
 import subprocess
 
+# User must set the following parameter
 nkf_cmd = 'C:\\Programs\\nkfwin\\nkf.exe'
+extensions = ['c','cpp','h']
+b_convert_to_utf8 = True
+
 
 def any2utf8(inencoding, infile, outfile=None):
     #print inencoding
@@ -42,15 +46,11 @@ def any2utf8(inencoding, infile, outfile=None):
 
 parser = argparse.ArgumentParser(description='any to utf-8')
 parser.add_argument('inputdir')
-parser.add_argument('extensions', nargs='?')
 
 commands = parser.parse_args()
 print commands
 indir = commands.inputdir
-extensions = commands.extensions
 
-if not extensions:
-    extensions = ['c','cpp','h']
 
 print extensions
 for base, dirs, files in os.walk(indir):
@@ -62,21 +62,24 @@ for base, dirs, files in os.walk(indir):
             file2 = p.match(os.path.join(base + file))
             if file2:
                 encoding = subprocess.check_output(nkf_cmd + ' -g ' + base + '\\' + file )
-                # â¸çsÇä‹ÇﬁÇÃÇ≈ï∂éöóÒîÕàÕÇéwíËÇ∑ÇÈ
-                if encoding[0:-1] == 'ASCII':
-                 #print file2.group() + ' ' + encoding[0:-1]
-                 any2utf8('ascii', base + '\\' + file)
-                elif encoding[0:-1] == 'UTF-8':
-                 #print file2.group() + ' ' + encoding[0:-1]
-                 any2utf8('utf-8', base + '\\' + file)
-                elif encoding[0:-1] == 'EUC-JP':
-                 #print file2.group() + ' ' + encoding[0:-1]
-                 any2utf8('euc_jp', base + '\\' + file)
-                elif encoding[0:-1] == 'CP932':
-                 #print file2.group() + ' ' + encoding[0:-1]
-                 any2utf8('cp932', base + '\\' + file)
+                if b_convert_to_utf8 == True:
+                    # ÊîπË°å„ÇíÂê´„ÇÄ„ÅÆ„ÅßÊñáÂ≠óÂàóÁØÑÂõ≤„ÇíÊåáÂÆö„Åô„Çã
+                    if encoding[0:-1] == 'ASCII':
+                     #print file2.group() + ' ' + encoding[0:-1]
+                     any2utf8('ascii', base + '\\' + file)
+                    elif encoding[0:-1] == 'UTF-8':
+                     #print file2.group() + ' ' + encoding[0:-1]
+                     any2utf8('utf-8', base + '\\' + file)
+                    elif encoding[0:-1] == 'EUC-JP':
+                     #print file2.group() + ' ' + encoding[0:-1]
+                     any2utf8('euc_jp', base + '\\' + file)
+                    elif encoding[0:-1] == 'CP932':
+                     #print file2.group() + ' ' + encoding[0:-1]
+                     any2utf8('cp932', base + '\\' + file)
+                    else:
+                     sys.stderr.write( file2.group() + ' Unknown encoding:' + encoding[0:-1] + '\n' )
                 else:
-                 sys.stderr.write( file2.group() + ' Unknown encoding:' + encoding[0:-1] + '\n' )
+                    print file2.group() + ' ' + encoding[0:-1]
 
 
 sys.exit()
